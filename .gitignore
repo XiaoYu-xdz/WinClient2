@@ -1,0 +1,13 @@
+# 编译输出
+bin/
+obj/
+
+# Meteor 客户端源码（本地参考用，克隆自 GitHub，不入库）
+meteor/
+
+# ZCode 会话数据
+.zcode/
+
+# IDE / 用户文件
+.vs/
+*.user

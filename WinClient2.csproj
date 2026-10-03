@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <PlatformTarget>x64</PlatformTarget>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <AssemblyName>WinClient2</AssemblyName>
+    <RootNamespace>WinClient2</RootNamespace>
+    <Version>0.1.0</Version>
+    <Authors>CNXia</Authors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="H.NotifyIcon" Version="2.4.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Fonts\**\*.ttf" />
+    <Resource Include="Resources\app.png" />
+  </ItemGroup>
+
+  <!-- plugin 目录是外部插件的独立源码工程，不参与本程序编译 -->
+  <ItemGroup>
+    <Compile Remove="plugin\**\*.cs" />
+    <Page Remove="plugin\**\*.xaml" />
+    <Resource Remove="plugin\**" />
+    <EmbeddedResource Remove="plugin\**" />
+    <None Remove="plugin\**" />
+  </ItemGroup>
+
+</Project>

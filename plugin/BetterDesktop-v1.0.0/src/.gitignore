@@ -1,0 +1,17 @@
+## .NET build output
+bin/
+obj/
+*.user
+
+## Test binaries
+com_test.exe
+test_loader.exe
+
+## IDE
+.vs/
+*.suo
+*.userprefs
+
+## 发布产物 (release assets & staging)
+release/
+BetterDesktop-v*.zip

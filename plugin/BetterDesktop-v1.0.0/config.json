@@ -1,0 +1,7 @@
+{
+  "_comment": "悬停终止后窗口保持显示的毫秒数，修改后保存本文件立即生效，无需重启",
+  "lingerMs": 3000,
+  "childCloseMs": 2500,
+  "graceMs": 500,
+  "hotkey": "RShift"
+}

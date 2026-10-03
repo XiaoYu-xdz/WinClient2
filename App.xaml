@@ -1,0 +1,126 @@
+<Application x:Class="WinClient2.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:WinClient2"
+             ShutdownMode="OnExplicitShutdown">
+    <Application.Resources>
+
+        <!-- ===== 内嵌字体（Meteor 常用字体） ===== -->
+        <FontFamily x:Key="FontComfortaa">pack://application:,,,/Fonts/#Comfortaa</FontFamily>
+        <FontFamily x:Key="FontJetBrainsMono">pack://application:,,,/Fonts/#JetBrains Mono</FontFamily>
+
+        <!-- ===== Meteor 官方主题色（MeteorGuiTheme） =====
+             accent           145, 61, 226   （紫）
+             background 三态  20 / 30 / 40 , alpha 200
+             文字           255,255,255 / 次级 150,150,150
+             占位符文字      255,255,255,20
+        -->
+        <Color x:Key="ColorAccent">#FF913DE2</Color>
+        <Color x:Key="ColorText">#FFFFFFFF</Color>
+        <Color x:Key="ColorTextSecondary">#FF969696</Color>
+        <Color x:Key="ColorBackgroundNormal">#C8141414</Color>
+        <Color x:Key="ColorBackgroundHovered">#C81E1E1E</Color>
+        <Color x:Key="ColorBackgroundPressed">#C8282828</Color>
+        <Color x:Key="ColorModuleBackground">#FF323232</Color>
+        <Color x:Key="ColorPlaceholder">#14FFFFFF</Color>
+
+        <!-- 可主题化颜色（默认 = Meteor，运行时由 ThemeService 修改） -->
+        <Color x:Key="ColorCheckbox">#FF913DE2</Color>
+        <Color x:Key="ColorPlus">#FF32FF32</Color>
+        <Color x:Key="ColorMinus">#FFFF3232</Color>
+        <Color x:Key="ColorFavorite">#FFFAD700</Color>
+        <Color x:Key="ColorTextHighlight">#642D7DF5</Color>
+        <Color x:Key="ColorTitleText">#FFFFFFFF</Color>
+        <Color x:Key="ColorOutlineNormal">#FF000000</Color>
+        <Color x:Key="ColorOutlineHovered">#FF0A0A0A</Color>
+        <Color x:Key="ColorOutlinePressed">#FF141414</Color>
+        <Color x:Key="ColorSliderLeft">#FF6423AA</Color>
+        <Color x:Key="ColorSliderRight">#FF323232</Color>
+        <Color x:Key="ColorSliderHandleNormal">#FF8200FF</Color>
+        <Color x:Key="ColorSliderHandleHovered">#FF8C1EFF</Color>
+        <Color x:Key="ColorSliderHandlePressed">#FF963CFF</Color>
+
+        <SolidColorBrush x:Key="BrushAccent" Color="{StaticResource ColorAccent}" />
+        <SolidColorBrush x:Key="BrushText" Color="{StaticResource ColorText}" />
+        <SolidColorBrush x:Key="BrushTextSecondary" Color="{StaticResource ColorTextSecondary}" />
+        <SolidColorBrush x:Key="BrushBackgroundNormal" Color="{StaticResource ColorBackgroundNormal}" />
+        <SolidColorBrush x:Key="BrushBackgroundHovered" Color="{StaticResource ColorBackgroundHovered}" />
+        <SolidColorBrush x:Key="BrushBackgroundPressed" Color="{StaticResource ColorBackgroundPressed}" />
+        <SolidColorBrush x:Key="BrushModuleBackground" Color="{StaticResource ColorModuleBackground}" />
+        <SolidColorBrush x:Key="BrushPlaceholder" Color="{StaticResource ColorPlaceholder}" />
+
+        <SolidColorBrush x:Key="BrushCheckbox" Color="{StaticResource ColorCheckbox}" />
+        <SolidColorBrush x:Key="BrushPlus" Color="{StaticResource ColorPlus}" />
+        <SolidColorBrush x:Key="BrushMinus" Color="{StaticResource ColorMinus}" />
+        <SolidColorBrush x:Key="BrushFavorite" Color="{StaticResource ColorFavorite}" />
+        <SolidColorBrush x:Key="BrushTextHighlight" Color="{StaticResource ColorTextHighlight}" />
+        <SolidColorBrush x:Key="BrushTitleText" Color="{StaticResource ColorTitleText}" />
+        <SolidColorBrush x:Key="BrushOutlineNormal" Color="{StaticResource ColorOutlineNormal}" />
+        <SolidColorBrush x:Key="BrushOutlineHovered" Color="{StaticResource ColorOutlineHovered}" />
+        <SolidColorBrush x:Key="BrushOutlinePressed" Color="{StaticResource ColorOutlinePressed}" />
+        <SolidColorBrush x:Key="BrushSliderLeft" Color="{StaticResource ColorSliderLeft}" />
+        <SolidColorBrush x:Key="BrushSliderRight" Color="{StaticResource ColorSliderRight}" />
+        <SolidColorBrush x:Key="BrushSliderHandleNormal" Color="{StaticResource ColorSliderHandleNormal}" />
+        <SolidColorBrush x:Key="BrushSliderHandleHovered" Color="{StaticResource ColorSliderHandleHovered}" />
+        <SolidColorBrush x:Key="BrushSliderHandlePressed" Color="{StaticResource ColorSliderHandlePressed}" />
+
+        <!-- ===== 顶栏标签按钮样式（还原 Meteor WTopBarButton，用 RadioButton 实现单选分组） ===== -->
+        <Style x:Key="TabButtonStyle" TargetType="{x:Type RadioButton}">
+            <Setter Property="Background" Value="{DynamicResource BrushBackgroundNormal}" />
+            <Setter Property="Foreground" Value="{DynamicResource BrushText}" />
+            <Setter Property="FontFamily" Value="{StaticResource FontComfortaa}" />
+            <Setter Property="FontSize" Value="19" />
+            <!-- Meteor: pad = scale(6)，约为字号的 0.67，两侧同值 -->
+            <Setter Property="Padding" Value="13,10" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type RadioButton}">
+                        <Border x:Name="bd"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="0">
+                            <ContentPresenter Margin="{TemplateBinding Padding}"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="{DynamicResource BrushBackgroundHovered}" />
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="{DynamicResource BrushBackgroundPressed}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ===== 页面文本样式（占位页） ===== -->
+        <Style x:Key="PageTitleStyle" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource FontComfortaa}" />
+            <Setter Property="FontSize" Value="30" />
+            <Setter Property="Foreground" Value="{DynamicResource BrushText}" />
+        </Style>
+        <Style x:Key="PageHintStyle" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource FontJetBrainsMono}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Foreground" Value="{DynamicResource BrushTextSecondary}" />
+            <Setter Property="Margin" Value="0,10,0,0" />
+        </Style>
+
+        <!-- ===== 深色 Tooltip（模块悬停显示描述） ===== -->
+        <Style TargetType="ToolTip">
+            <Setter Property="Background" Value="#E6141414" />
+            <Setter Property="Foreground" Value="{DynamicResource BrushText}" />
+            <Setter Property="FontFamily" Value="{StaticResource FontJetBrainsMono}" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Padding" Value="7,5" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="HasDropShadow" Value="False" />
+        </Style>
+
+    </Application.Resources>
+</Application>

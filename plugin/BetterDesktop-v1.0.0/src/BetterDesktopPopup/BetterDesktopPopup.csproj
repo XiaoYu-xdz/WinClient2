@@ -1,0 +1,51 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- 目标框架：.NET Framework 4.8 -->
+    <TargetFramework>net48</TargetFramework>
+    
+    <!-- 输出类型：Windows 可执行程序（无控制台窗口） -->
+    <OutputType>WinExe</OutputType>
+    
+    <!-- 平台：x64 -->
+    <Platforms>x64</Platforms>
+    <PlatformTarget>x64</PlatformTarget>
+    
+    <!-- 程序集名称 -->
+    <AssemblyName>BetterDesktopPopup</AssemblyName>
+    <RootNamespace>BetterDesktopPopup</RootNamespace>
+    
+    <!-- 输出路径 -->
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <OutputPath>bin\$(Platform)\$(Configuration)</OutputPath>
+    
+    <!-- 禁止 SDK 自动生成 AssemblyInfo（与手动 AssemblyInfo.cs 冲突） -->
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <DefineConstants>TRACE</DefineConstants>
+    <DebugType>pdbonly</DebugType>
+  </PropertyGroup>
+
+<ItemGroup>
+    <!-- 显式引用 Windows Forms 和 Drawing -->
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Drawing" />
+    <!-- 用于 DataContractJsonSerializer (JSON 序列化) -->
+    <Reference Include="System.Runtime.Serialization" />
+    <!-- 用于命名管道 -->
+    <Reference Include="System.Core" />
+    <!-- UI Automation (获取鼠标下文件/文件夹名) -->
+    <Reference Include="UIAutomationClient" />
+    <Reference Include="UIAutomationTypes" />
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+
+</Project>

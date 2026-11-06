@@ -19,6 +19,8 @@ namespace BetterDesktopPopup
         private DateTime _lastOnPopupTime = DateTime.MinValue; // 上次鼠标在弹出窗口上的时间
         private DateTime _folderLeaveTime = DateTime.MinValue; // 鼠标离开文件夹的时间（用于消失延迟）
         private IntPtr _currentExplorerHwnd = IntPtr.Zero;    // 当前悬停的资源管理器窗口句柄
+        private NativeMethods.POINT _lastQueryPos;            // 上次全量查询时的鼠标位置
+        private bool _hasQueryPos;                            // 是否已有查询位置记录
 
         public MouseHook(PopupForm popupForm)
         {
@@ -125,7 +127,21 @@ namespace BetterDesktopPopup
                 }
 
                 // 热键按下，获取当前文件夹路径
-                string folderPath = GetCurrentFolderPath();
+                // 性能优化：鼠标未移动时沿用上次结果，跳过 UIA/COM 全量查询（此前每 50ms 跑一次）
+                NativeMethods.GetCursorPos(out var curPt);
+                bool mouseMoved = !_hasQueryPos
+                    || curPt.X != _lastQueryPos.X || curPt.Y != _lastQueryPos.Y;
+                string folderPath;
+                if (!mouseMoved && !string.IsNullOrEmpty(_currentFolder))
+                {
+                    folderPath = _currentFolder;
+                }
+                else
+                {
+                    _lastQueryPos = curPt;
+                    _hasQueryPos = true;
+                    folderPath = GetCurrentFolderPath();
+                }
                 bool folderChanged = (folderPath != _currentFolder);
 
                 // 如果文件夹变了（或窗口还没显示），更新显示

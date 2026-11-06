@@ -847,6 +847,21 @@ public partial class OverlayWindow : Window
             panel.Children.Add(row);
         }
 
+        // 按键绑定（还原 Meteor WKeybind）：写入插件 config.json 的 hotkey 字段
+        var keybindRow = new KeybindSettingRow("按键绑定")
+        {
+            DefaultValue = module.DefaultKeybind ?? "RShift",
+            Width = contentWidth,
+            Margin = new Thickness(0, 12, 0, 0),
+        };
+        keybindRow.SetValue(module.Keybind ?? module.DefaultKeybind ?? "RShift");
+        keybindRow.ValueChanged += (_, _) =>
+        {
+            module.Keybind = keybindRow.Value;
+            module.OnKeybindChanged();
+        };
+        panel.Children.Add(keybindRow);
+
         _moduleSettingsWindow.Content.Content = panel;
         _moduleSettingsWindow.Visibility = Visibility.Visible;
 

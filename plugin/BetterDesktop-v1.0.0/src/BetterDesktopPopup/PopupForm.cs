@@ -36,6 +36,25 @@ namespace BetterDesktopPopup
         private static readonly Color ColorFormBg = Color.FromArgb(252, 252, 252);
         private static readonly Font FontNormal = new Font("Segoe UI", 18f);  // 文字大小 18pt
 
+        // ===== 进程级图标缓存 =====
+        // 所有弹窗实例共享；shell 图标每个扩展名只取一次，避免反复级联时的句柄累积
+        private static readonly Dictionary<string, Icon> _shellIconCache = new Dictionary<string, Icon>();
+
+        /// <summary>从进程级缓存取 shell 图标，不存在则取一次并缓存。</summary>
+        private static Icon GetIconCached(string iconKey, string fullPath, bool isDirectory)
+        {
+            lock (_shellIconCache)
+            {
+                if (_shellIconCache.TryGetValue(iconKey, out Icon cached) && cached != null)
+                    return cached;
+
+                Icon icon = NativeMethods.GetShellIcon(fullPath, false, isDirectory)
+                    ?? NativeMethods.GetShellIcon(isDirectory ? "__generic_folder__" : "dummy.txt", false, isDirectory);
+                _shellIconCache[iconKey] = icon;
+                return icon;
+            }
+        }
+
         // ===== 窗口尺寸 =====
         private const int FormWidth = 420;
         private const int FormHeight = 520;
@@ -60,7 +79,40 @@ namespace BetterDesktopPopup
             this.Size = new Size(FormWidth, FormHeight);
             this.BackColor = ColorFormBg;
             this.DoubleBuffered = true;
+            this.KeyPreview = true; // 键盘导航（↑↓ 选择、回车打开、Esc 关闭）
+            this.KeyDown += PopupForm_KeyDown;
             TrySetRoundedCorners();
+        }
+
+        /// <summary>键盘导航：↑↓ 移动选择、回车打开、Esc 关闭。</summary>
+        private void PopupForm_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (_listView.Items.Count == 0) return;
+            switch (e.KeyCode)
+            {
+                case Keys.Up:
+                case Keys.Down:
+                    int idx = _listView.SelectedIndices.Count > 0 ? _listView.SelectedIndices[0] : -1;
+                    idx = e.KeyCode == Keys.Up
+                        ? Math.Max(0, idx - 1)
+                        : Math.Min(_listView.Items.Count - 1, idx + 1);
+                    _listView.SelectedItems.Clear();
+                    _listView.Items[idx].Selected = true;
+                    _listView.Items[idx].Focused = true;
+                    _listView.EnsureVisible(idx);
+                    _listView.Focus();
+                    e.Handled = true;
+                    break;
+                case Keys.Enter:
+                    if (_listView.SelectedItems.Count > 0)
+                        OpenItem(_listView.SelectedItems[0]);
+                    e.Handled = true;
+                    break;
+                case Keys.Escape:
+                    HidePopup();
+                    e.Handled = true;
+                    break;
+            }
         }
 
         private void TrySetRoundedCorners()
@@ -145,12 +197,12 @@ namespace BetterDesktopPopup
                 ColorDepth = ColorDepth.Depth32Bit
             };
 
-            // 默认图标
-            var folderIcon = NativeMethods.GetShellIcon("__generic_folder__", false, true);
+            // 默认图标（走进程级缓存）
+            var folderIcon = GetIconCached("folder", "__generic_folder__", true);
             if (folderIcon != null)
                 _imageList.Images.Add("folder", folderIcon);
 
-            var fileIcon = NativeMethods.GetShellIcon("dummy.txt", false);
+            var fileIcon = GetIconCached("file", "dummy.txt", false);
             if (fileIcon != null)
                 _imageList.Images.Add("file", fileIcon);
 
@@ -230,8 +282,11 @@ namespace BetterDesktopPopup
             if (_childPopup == null)
                 AdjustWidthToContent();
 
-            // 定位
-            this.Location = new Point(mouseX, mouseY);
+            // 定位（钳制到屏幕工作区，避免在屏幕边缘时超出屏幕）
+            var wa = Screen.FromPoint(new Point(mouseX, mouseY)).WorkingArea;
+            int clampedX = Math.Min(Math.Max(mouseX, wa.Left), Math.Max(wa.Left, wa.Right - this.Width));
+            int clampedY = Math.Min(Math.Max(mouseY, wa.Top), Math.Max(wa.Top, wa.Bottom - this.Height));
+            this.Location = new Point(clampedX, clampedY);
 
             // 置顶显示
             this.TopMost = true;
@@ -294,10 +349,10 @@ namespace BetterDesktopPopup
             string fullPath = entry.FullName;
             string iconKey = GetIconKey(fullPath, isDirectory);
 
-            // 如果图标不在缓存中，加载它
+            // 如果图标不在本窗体的 ImageList 中，从进程级缓存取（ImageList 会复制位图）
             if (!_imageList.Images.ContainsKey(iconKey))
             {
-                Icon icon = NativeMethods.GetShellIcon(fullPath, false, isDirectory);
+                Icon icon = GetIconCached(iconKey, fullPath, isDirectory);
                 if (icon != null)
                     _imageList.Images.Add(iconKey, icon);
                 else
@@ -466,7 +521,12 @@ namespace BetterDesktopPopup
 
         private void ListView_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-            var item = _listView.GetItemAt(e.X, e.Y);
+            OpenItem(_listView.GetItemAt(e.X, e.Y));
+        }
+
+        /// <summary>打开列表项：文件夹在标签页打开，文件用默认程序。</summary>
+        private void OpenItem(ListViewItem item)
+        {
             if (item == null) return;
             string path = item.Tag as string;
             if (string.IsNullOrEmpty(path)) return;
